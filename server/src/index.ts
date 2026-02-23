@@ -1,5 +1,4 @@
 import { serve } from "bun";
-import index from "./index.html";
 import { Transcriber } from "./transcriber";
 import { AVAILABLE_MODELS, isModelDownloaded, downloadModel, listLocalModels, type WhisperModel } from "./models";
 
@@ -10,21 +9,25 @@ if (isModelDownloaded("tiny.en")) {
   await transcriber.init("tiny.en");
 }
 
-const server = serve({
-  routes: {
-    "/*": index,
-    "/ws": async (req) => {
-      if (server.upgrade(req, { 
-        data: { 
-          audioBuffer: new Int16Array(0), 
-          isTranscribing: false,
-          language: "en" 
-        } 
-      })) {
-        return undefined;
-      }
-      return new Response("Upgrade failed", { status: 400 });
-    },
+type WSData = { 
+  audioBuffer: Int16Array; 
+  isTranscribing: boolean;
+  language: string;
+};
+
+const server = serve<WSData>({
+  port: 3000,
+  fetch(req, server) {
+    if (server.upgrade(req, { 
+      data: { 
+        audioBuffer: new Int16Array(0), 
+        isTranscribing: false,
+        language: "en" 
+      } 
+    })) {
+      return undefined;
+    }
+    return new Response("Whisper Server Running", { status: 200 });
   },
 
   websocket: {
@@ -38,7 +41,7 @@ const server = serve({
       }));
     },
     async message(ws, message) {
-      const data = ws.data as { audioBuffer: Int16Array; isTranscribing: boolean; language: string };
+      const data = ws.data;
       
       if (typeof message === "string") {
         const payload = JSON.parse(message);
@@ -119,4 +122,4 @@ const server = serve({
   },
 });
 
-console.log(`🚀 Server running at ${server.url}`);
+console.log(`🚀 Whisper Server running at ${server.url}`);

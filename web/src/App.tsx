@@ -14,7 +14,7 @@ export function App() {
           </svg>
         </div>
         
-        <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+        <h1 className="text-5xl md:text-6xl font-black mb-4 tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-white to-slate-400">
           WHISPER LIVE
         </h1>
         <p className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">

@@ -17,8 +17,10 @@ export function TranscribeApp() {
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
 
   const connect = () => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+    // For embedded glass/standalone server, the backend runs on a known port (e.g., 3000)
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${wsProtocol}//${window.location.hostname}:3000/ws`;
+    const ws = new WebSocket(wsUrl);
     ws.binaryType = "arraybuffer";
     ws.onopen = () => { setStatus("Connected"); wsRef.current = ws; };
     ws.onclose = () => { setStatus("Disconnected"); wsRef.current = null; };
@@ -59,15 +61,16 @@ export function TranscribeApp() {
       const processor = audioContext.createScriptProcessor(4096, 1, 1);
       scriptProcessorRef.current = processor;
       processor.onaudioprocess = (e) => {
-        if (wsRef.current?.readyState !== WebSocket.OPEN) return;
+        const ws = wsRef.current;
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
         const inputData = e.inputBuffer.getChannelData(0);
         const downsampled = downsample(inputData, audioContext.sampleRate, 16000);
         const int16Data = new Int16Array(downsampled.length);
         for (let i = 0; i < downsampled.length; i++) {
-          const s = Math.max(-1, Math.min(1, downsampled[i]));
+          const s = Math.max(-1, Math.min(1, downsampled[i]!));
           int16Data[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
         }
-        wsRef.current.send(int16Data.buffer);
+        ws.send(int16Data.buffer);
       };
       source.connect(processor);
       processor.connect(audioContext.destination);
@@ -92,7 +95,7 @@ export function TranscribeApp() {
     while (oR < result.length) {
       const nextOB = Math.round((oR + 1) * ratio);
       let accum = 0, count = 0;
-      for (let i = oB; i < nextOB && i < buffer.length; i++) { accum += buffer[i]; count++; }
+      for (let i = oB; i < nextOB && i < buffer.length; i++) { accum += buffer[i]!; count++; }
       result[oR++] = accum / count;
       oB = nextOB;
     }
@@ -202,7 +205,7 @@ export function TranscribeApp() {
       </div>
 
       {/* Main Transcription Console */}
-      <div className="glass rounded-[2rem] p-1 shadow-2xl relative">
+      <div className="glass rounded-4xl p-1 shadow-2xl relative">
         <div className="bg-slate-900/40 rounded-[1.8rem] p-8 md:p-12 overflow-hidden relative">
           
           {/* Status Indicators */}
@@ -229,7 +232,7 @@ export function TranscribeApp() {
           </div>
 
           {/* Transcript View */}
-          <div className="relative min-h-[300px] flex flex-col justify-end">
+          <div className="relative min-h-75 flex flex-col justify-end">
             <div 
               className={`text-2xl md:text-3xl font-bold leading-[1.6] tracking-tight transition-all duration-500
                 ${currentLanguage === "ar" ? "text-right" : "text-left"}`}

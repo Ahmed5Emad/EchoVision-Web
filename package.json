@@ -4,14 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
-    "start": "NODE_ENV=production bun src/index.ts",
+    "dev:server": "bun --hot server/src/index.ts",
+    "dev:web": "bun --hot web/server.ts",
+    "start:server": "NODE_ENV=production bun server/src/index.ts",
+    "start:web": "NODE_ENV=production bun web/server.ts",
+    "dev": "concurrently \"bun run dev:server\" \"bun run dev:web\"",
+    "start": "concurrently \"bun run start:server\" \"bun run start:web\"",
     "build": "bun run build.ts"
   },
   "dependencies": {
     "@fugood/node-whisper-linux-x64-cuda": "^1.0.16",
     "@fugood/whisper.node": "^1.0.16",
     "bun-plugin-tailwind": "^0.1.2",
+    "concurrently": "^8.2.2",
     "node-addon-api": "^8.5.0",
     "react": "^19",
     "react-dom": "^19",
