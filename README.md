@@ -69,8 +69,8 @@ copy Release\index.node ..\lib\index.node
 ## 📈 Performance (Tested)
 
 On an **NVIDIA GeForce RTX 3060 Laptop GPU** (CUDA 13.1):
-- **Processing Time:** ~0.05s - 0.2s for 1.5s of audio.
-- **Model Used:** `tiny.en` and `base`.
+- **Processing Time:** ~0.05s - 0.3s for 1.5s of audio.
+- **Model Used:** `tiny.en` , `base` , `large-v3` and `Large-v3-turbo`.
 - **Latency:** Near-instantaneous streaming updates with no perceived lag.
 
 ## ⚖️ License
