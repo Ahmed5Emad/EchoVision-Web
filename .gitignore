@@ -1,0 +1,8 @@
+node_modules/
+models/
+build/
+.DS_Store
+*.node
+.env*
+dist/
+out/
